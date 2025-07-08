@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>IPと位置情報の確認</title>
+  <style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom right, #e0eafc, #cfdef3);
+    padding: 2rem;
+    color: #333;
+    margin: 0;
+  }
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+  }
+  .info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    line-height: 1.6;
+    max-width: 500px;
+    margin: auto;
+  }
+</style>
+
+</head>
+<body>
+  <h1>あなたのアクセス情報</h1>
+  <div class="info" id="result">取得中...</div>
+
+  <script>
+    fetch('https://ipapi.co/json/')
+      .then(response => response.json())
+      .then(data => {
+        const result = `
+          <strong>IP:</strong> ${data.ip} <br>
+          <strong>国:</strong> ${data.country_name} (${data.country_code})<br>
+          <strong>地域:</strong> ${data.region}<br>
+          <strong>市区町村:</strong> ${data.city}<br>
+          <strong>郵便番号:</strong> ${data.postal}<br>
+          <strong>プロバイダ:</strong> ${data.org}<br>
+          <strong>時刻:</strong> ${new Date().toLocaleString()}
+        `;
+        document.getElementById('result').innerHTML = result;
+      })
+      .catch(error => {
+        document.getElementById('result').innerText = '情報の取得に失敗しました。';
+        console.error('エラー:', error);
+      });
+  </script>
+</body>
+</html>
