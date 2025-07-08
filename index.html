@@ -9,68 +9,139 @@
       font-family: sans-serif;
       text-align: center;
       padding: 30px;
-      background-color: #f4f4f4;
+      background-color: #f9f9f9;
     }
     h1 {
-      font-size: 24px;
+      font-size: 28px;
+      margin-bottom: 10px;
     }
-    #clickButton, #startButton {
-      font-size: 24px;
-      padding: 20px 40px;
+    p {
+      font-size: 16px;
+      color: #333;
+    }
+    button {
+      font-size: 20px;
+      padding: 15px 30px;
       margin: 20px;
       cursor: pointer;
+      border: none;
+      border-radius: 8px;
+    }
+    #startButton {
+      background-color: #007BFF;
+      color: white;
     }
     #clickButton {
-      background: #4CAF50;
+      background-color: #28A745;
       color: white;
-      border: none;
       display: none;
+    }
+    #countdown {
+      font-size: 48px;
+      color: #e74c3c;
+      margin: 20px 0;
     }
     #result {
       font-size: 20px;
-      margin-top: 20px;
+      margin-top: 30px;
+    }
+    .share-buttons {
+      margin-top: 30px;
+    }
+    .share-buttons a {
+      display: inline-block;
+      margin: 0 10px;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      color: white;
+    }
+    .twitter {
+      background: #1DA1F2;
+    }
+    .line {
+      background: #06C755;
     }
   </style>
 </head>
 <body>
   <h1>1秒チャレンジ！クリック王</h1>
-  <p>1秒間で何回クリックできるか挑戦しよう！</p>
+  <p>1秒間でどれだけクリックできるか試してみよう！<br>「スタート」→「3,2,1...」でカウントダウン → 緑のボタンを連打！</p>
 
   <button id="startButton">スタート</button>
+  <div id="countdown"></div>
   <button id="clickButton">連打！</button>
 
   <div id="result"></div>
 
+  <div class="share-buttons" id="shareArea" style="display:none;">
+    <a id="twitterShare" class="twitter" href="#" target="_blank">Xでシェア</a>
+    <a id="lineShare" class="line" href="#" target="_blank">LINEでシェア</a>
+  </div>
+
   <script>
     const startButton = document.getElementById("startButton");
     const clickButton = document.getElementById("clickButton");
+    const countdown = document.getElementById("countdown");
     const resultDiv = document.getElementById("result");
+    const shareArea = document.getElementById("shareArea");
+    const twitterShare = document.getElementById("twitterShare");
+    const lineShare = document.getElementById("lineShare");
 
     let clickCount = 0;
     let bestScore = localStorage.getItem("bestScore") || 0;
 
     startButton.addEventListener("click", () => {
-      clickCount = 0;
-      resultDiv.textContent = "よーい…スタート！";
-      clickButton.style.display = "inline-block";
       startButton.disabled = true;
+      clickCount = 0;
+      resultDiv.textContent = "";
+      shareArea.style.display = "none";
 
-      setTimeout(() => {
-        clickButton.style.display = "none";
-        startButton.disabled = false;
-        resultDiv.innerHTML = `結果：<strong>${clickCount}回</strong><br>`;
-        if (clickCount > bestScore) {
-          bestScore = clickCount;
-          localStorage.setItem("bestScore", bestScore);
-          resultDiv.innerHTML += "🎉自己ベスト更新！🎉<br>";
+      let count = 3;
+      countdown.textContent = count;
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdown.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          countdown.textContent = "スタート！";
+          clickButton.style.display = "inline-block";
+
+          setTimeout(() => {
+            clickButton.style.display = "none";
+            countdown.textContent = "";
+            startButton.disabled = false;
+
+            let resultText = `結果：<strong>${clickCount}回</strong><br>`;
+            if (clickCount > bestScore) {
+              bestScore = clickCount;
+              localStorage.setItem("bestScore", bestScore);
+              resultText += "🎉 自己ベスト更新！ 🎉<br>";
+            }
+            resultText += `最高記録：${bestScore}回`;
+
+            resultDiv.innerHTML = resultText;
+            showShareButtons(clickCount);
+
+          }, 1000); // 1秒間連打
+
+          clickButton.addEventListener("click", () => {
+            clickCount++;
+          }, { once: false });
         }
-        resultDiv.innerHTML += `最高記録：${bestScore}回`;
-      }, 1000); // 1秒
-
-      clickButton.addEventListener("click", () => {
-        clickCount++;
-      }, { once: false }); // 何回でも押せるように
+      }, 1000);
     });
+
+    function showShareButtons(score) {
+      const text = `1秒チャレンジで${score}回クリックしたよ！君は超えられる？🔥 #クリック王`;
+      const url = location.href;
+      twitterShare.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      lineShare.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      shareArea.style.display = "block";
+    }
   </script>
 </body>
 </html>
